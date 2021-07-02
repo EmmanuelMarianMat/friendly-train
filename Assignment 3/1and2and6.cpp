@@ -10,12 +10,14 @@ class TreeNode
             left = NULL;
             right = NULL;
             height = 1;
+            count = 1;
         }
         TreeNode *left;
         TreeNode *right;
         int data;
         int sum;
         int height;
+        int count;
         friend class Tree;
 };
 
@@ -54,8 +56,25 @@ class Tree{
             }
         }
 
+        void sortAVL(int* arr, int length){
+            for(int i=0; i<length; i++)
+                root = insertNodeHelper2(root,arr[i]);
+            
+            int count=0;
+            sortHelper(root, arr, &count);
+        }
+
 
     private:
+        void sortHelper(TreeNode *tree, int arr[], int *count){
+            if(tree){
+                sortHelper(tree->left,arr,count);
+                for(int i=0; i<tree->count; i++)
+                    arr[(*count)++] = tree->data;
+                sortHelper(tree->right,arr,count);
+            }
+        }
+
         bool isBST(TreeNode *tree){
             if(!tree || !(tree->left||tree->right)){
                 return true;
@@ -141,6 +160,41 @@ class Tree{
                 printTreeHelper(tree->right);
             }
             cout<<")";
+        }
+
+        TreeNode* insertNodeHelper2(TreeNode *tree, int value){
+            if(tree==NULL)
+                return new TreeNode(value);
+            else if(tree->data>value)
+                tree->left = insertNodeHelper(tree->left,value);
+            else if(tree->data<value)
+                tree->right = insertNodeHelper(tree->right,value);
+            else{
+                tree->count++;
+                return tree;
+            }
+
+            updateHeights(tree);
+            
+            int balance = getBalance(tree);
+
+            if(balance>1 && tree->left->data>value)
+                return rightRotate(tree);
+            
+            if(balance>1 && tree->left->data<=value){
+                tree->left = leftRotate(tree->left);
+                return rightRotate(tree);
+            }
+
+            if(balance<-1 && tree->right->data<=value)
+                return leftRotate(tree);
+            
+            if(balance<-1 && tree->right->data>value){
+                tree->right = rightRotate(tree->right);
+                return leftRotate(tree);
+            }
+
+            return tree;
         }
 
         TreeNode* insertNodeHelper(TreeNode *tree, int value){
@@ -261,6 +315,11 @@ class Tree{
         TreeNode *root;
 };
 
+void sort(int *arr, int length){
+    Tree tree;
+    tree.sortAVL(arr,length);
+    tree.deleteTree();
+}
 
 int main(){
     Tree tree;
@@ -277,5 +336,12 @@ int main(){
     tree.deleteTree();
     tree.insertParen("(12(8(5(4()())())(11()()))(18(17()())()))");
     tree.printTree();
+    tree.deleteTree();
+    int arr[] = {100,12,100,1,1,12,100,1,12,100,1,1};
+    sort(arr,12);
+    for(int i=0; i<12; i++){
+        cout<<arr[i]<<" ";
+    }
+    cout<<endl;
     return 0;
 }
