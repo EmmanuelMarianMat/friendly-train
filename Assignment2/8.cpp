@@ -224,5 +224,4 @@ int main(){
     HuffManTree tree = HuffManTree(word);
     tree.printTree();
     tree.findCodes();
-    //tree.findCodes();
 }
